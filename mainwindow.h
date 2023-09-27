@@ -25,17 +25,20 @@ public:
     void setFileState(FileState fs);
     //ui functions
 public:
-//    void updateStatusBar();
 private:
     bool initMapSize();//使用对话框初始化地图规模，返回是否成功
     void initBoxList();
+
+    void writeToBasicFile(const QString& dirPath);//在dirPath中重写basic.json
+    void writeToPlayerInfosFile(const QString& dirPath);//在dirPath中重写player_infos.json
+
+    void recheckFileName(QString& src,const QString baseName);
 private slots:
     void on_actionNew_triggered();
     void on_actionQuit_triggered();
     void on_actionOpen_triggered();
     void on_actionSave_triggered();
     void on_actionClear_triggered();
-
     void fileStateChangedSlot(FileState state);
 
 

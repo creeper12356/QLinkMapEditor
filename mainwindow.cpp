@@ -114,6 +114,47 @@ void MainWindow::initBoxList()
     }
 }
 
+void MainWindow::writeToBasicFile(const QString &dirPath)
+{
+    QString basicFile = dirPath + "/basic.json";
+    QJsonObject basic;
+    basic.insert("wScale",ui->centralwidget->getWScale());
+    basic.insert("hScale",ui->centralwidget->getHScale());
+    basic.insert("corner",QJsonArray({0,0}));
+    basic.insert("size",QJsonArray({40,40}));
+    basic.insert("dist",QJsonArray({10,10}));
+    basic.insert("gameTime",9999);
+    QFile writer(basicFile);
+    writer.open(QIODevice::WriteOnly);
+    writer.write(QJsonDocument(basic).toJson());
+    writer.close();
+}
+
+void MainWindow::writeToPlayerInfosFile(const QString &dirPath)
+{
+    QString playerInfosFile = dirPath + "/player_infos.json";
+    QJsonArray playerInfos;
+    QJsonObject playerInfo;
+    playerInfo.insert("id","creeper");
+    playerInfo.insert("pos",QJsonArray({0,0}));
+    playerInfo.insert("faceDir","0");
+    playerInfos.append(playerInfo);
+    QFile writer(playerInfosFile);
+    writer.open(QIODevice::WriteOnly);
+    writer.write(QJsonDocument(playerInfos).toJson());
+    writer.close();
+}
+
+void MainWindow::recheckFileName(QString &src, const QString baseName)
+{
+    //recheck
+    if(QFileInfo(src).baseName() != baseName){
+        qDebug() << "recheck;\n";
+        QDir dir(src); dir.cdUp();
+        src = dir.path() + "/" + baseName + ".json";
+    }
+}
+
 void MainWindow::on_actionNew_triggered()
 {
     ui->centralwidget->deleteData();
@@ -202,6 +243,17 @@ void MainWindow::on_actionSave_triggered()
             return ;
         }
     }
+
+    recheckFileName(fileName,"map");
+    qDebug() << "fileName: " << fileName;
+    QDir saveDir = QDir(fileName);  saveDir.cdUp();
+
+    if(!QFile::exists(saveDir.path() + "/basic.json")){
+        writeToBasicFile(saveDir.path());
+    }
+    if(!QFile::exists(saveDir.path() + "/player_infos.json")){
+        writeToPlayerInfosFile(saveDir.path());
+    }
     setFileState(open_save);
     this->path = fileName;
     QFile writer;
@@ -215,8 +267,7 @@ void MainWindow::on_actionSave_triggered()
             jArray.append(ui->centralwidget->getConstDataAt(i,j));
         }
     }
-    QJsonDocument docu(jArray);
-    writer.write(docu.toJson());
+    writer.write(QJsonDocument(jArray).toJson());
     writer.close();
 }
 
